@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Drive</title>
+    
+    <style>
+        /* --- ระบบ Theme Variables --- */
+        :root {
+            --bg-body: #f8f9fa;
+            --bg-surface: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #202124;
+            --text-sub: #5f6368;
+            --border-color: #e8eaed;
+            --hover-bg: #f1f3f4;
+            --active-blue-bg: #e8f0fe;
+            --active-blue-text: #1a73e8;
+            --input-bg: #f8f9fa;
+            --modal-backdrop: rgba(32,33,36,0.4);
+            --shadow-subtle: 0 1px 3px 0 rgba(0,0,0,0.05);
+            --shadow-float: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        body.dark-mode {
+            --bg-body: #131314;
+            --bg-surface: #1e1f20;
+            --bg-card: #282a2c;
+            --text-main: #e3e3e3;
+            --text-sub: #9aa0a6;
+            --border-color: #333538;
+            --hover-bg: #2d2f31;
+            --active-blue-bg: #28374a;
+            --active-blue-text: #8ab4f8;
+            --input-bg: #1e1f20;
+            --modal-backdrop: rgba(0,0,0,0.6);
+            --shadow-subtle: 0 1px 3px 0 rgba(0,0,0,0.3);
+            --shadow-float: 0 4px 16px rgba(0,0,0,0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; transition: background-color 0.2s ease, border-color 0.2s ease; }
+        body { display: flex; flex-direction: column; height: 100vh; background-color: var(--bg-body); color: var(--text-main); overflow: hidden; user-select: none; }
+
+        .header { display: flex; align-items: center; padding: 12px 24px; background-color: var(--bg-surface); border-bottom: 1px solid var(--border-color); z-index: 20;}
+        .logo { font-size: 20px; font-weight: 500; color: var(--text-sub); width: 256px; cursor: pointer; transition: opacity 0.2s;}
+        .logo:hover { opacity: 0.7; }
+        .search-bar { flex: 1; max-width: 720px; background-color: var(--input-bg); border-radius: 12px; padding: 10px 20px; display: flex; align-items: center; border: 1px solid transparent; }
+        .search-bar:focus-within { background-color: var(--bg-surface); box-shadow: var(--shadow-subtle); border-color: var(--border-color); }
+        .search-bar input { border: none; background: transparent; width: 100%; font-size: 15px; outline: none; color: var(--text-main); }
+
+        .app-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        .sidebar { width: 256px; background-color: var(--bg-body); padding: 16px 16px 16px 0; display: flex; flex-direction: column; justify-content: space-between; z-index: 15; border-right: 1px solid var(--border-color);}
+        .add-btn { margin-left: 16px; display: flex; align-items: center; gap: 10px; background-color: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 16px; padding: 10px 20px; font-size: 14px; font-weight: 500; cursor: pointer; margin-bottom: 24px; width: fit-content; }
+        .add-btn:hover { background-color: var(--hover-bg); }
+        
+        .nav-list { display: flex; flex-direction: column; overflow-y: auto; margin-bottom: 16px; }
+        .nav-item { padding: 10px 24px 10px 40px; border-radius: 0 16px 16px 0; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;}
+        .nav-item:hover { background-color: var(--hover-bg); }
+        .nav-item.active { background-color: var(--active-blue-bg); color: var(--active-blue-text); }
+        
+        .cat-actions { display: none; gap: 4px; }
+        .nav-item:hover .cat-actions { display: flex; }
+        .cat-action-btn { background: none; border: none; cursor: pointer; color: var(--text-sub); padding: 4px; border-radius: 4px; font-size: 12px; }
+        .cat-action-btn:hover { background-color: var(--border-color); color: var(--text-main); }
+
+        .add-category-btn { margin-left: 40px; font-size: 13px; color: var(--text-sub); cursor: pointer; padding: 8px 12px; border-radius: 4px; display: inline-block; width: fit-content;}
+        .add-category-btn:hover { background-color: var(--hover-bg); color: var(--text-main);}
+
+        .sidebar-footer { padding-left: 32px; padding-bottom: 8px; }
+        .theme-toggle-btn { background: none; border: 1px solid var(--border-color); color: var(--text-sub); padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .theme-toggle-btn:hover { background-color: var(--hover-bg); color: var(--text-main); }
+
+        .main-content { flex: 1; background-color: var(--bg-surface); border-radius: 16px 16px 0 0; margin-top: 16px; margin-right: 16px; padding: 32px; box-shadow: var(--shadow-subtle); overflow-y: auto; position: relative; }
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+        .content-title { font-size: 18px; font-weight: 500; color: var(--text-main); }
+        
+        .sort-select { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-sub); background-color: var(--bg-surface); cursor: pointer; outline: none; }
+        .sort-select:hover, .sort-select:focus { border-color: var(--active-blue-text); }
+
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+
+        .project-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px; cursor: pointer; user-select: text;}
+        .project-card:hover { border-color: var(--active-blue-text); box-shadow: var(--shadow-subtle); }
+        .project-card.selected { background-color: var(--active-blue-bg); border-color: var(--active-blue-text); }
+        
+        .card-header { display: flex; align-items: center; gap: 12px; pointer-events: none; }
+        .folder-icon { font-size: 24px; }
+        .project-card h3 { font-size: 15px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        
+        .card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; pointer-events: none;}
+        .status-wrapper { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-sub); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .dot-green { background-color: #34a853; box-shadow: 0 0 0 2px rgba(52, 168, 83, 0.2); } 
+        .dot-yellow { background-color: #fbbc04; box-shadow: 0 0 0 2px rgba(251, 188, 4, 0.2); } 
+        .dot-red { background-color: #ea4335; box-shadow: 0 0 0 2px rgba(234, 67, 53, 0.2); } 
+        .card-deadline { font-size: 12px; color: var(--text-sub);}
+
+        .selection-box { position: absolute; background-color: rgba(26, 115, 232, 0.15); border: 1px solid rgba(26, 115, 232, 0.5); z-index: 100; pointer-events: none; display: none; }
+
+        .selection-toolbar { 
+            position: absolute; top: -60px; left: 50%; transform: translateX(-50%); 
+            background-color: var(--bg-surface); padding: 4px 12px; border-radius: 20px; 
+            display: flex; align-items: center; gap: 10px; 
+            box-shadow: var(--shadow-float); 
+            transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 200; font-size: 13px;
+            border: 1px solid var(--border-color); color: var(--text-main);
+        }
+        .selection-toolbar.show { top: 16px; }
+        .selection-count { font-weight: 500; margin: 0 4px; }
+        .toolbar-divider { width: 1px; height: 16px; background-color: var(--border-color); }
+        .toolbar-btn { background: none; border: none; cursor: pointer; color: var(--text-sub); padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;}
+        .toolbar-btn:hover { background-color: var(--hover-bg); color: var(--text-main);}
+        .toolbar-btn.close { color: var(--active-blue-text); }
+
+        .details-pane { 
+            position: absolute; top: 0; bottom: 0; right: -350px; width: 320px; 
+            background-color: var(--bg-surface); border-left: 1px solid var(--border-color); 
+            padding: 24px; display: flex; flex-direction: column; overflow-y: auto; 
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease; 
+            z-index: 150; user-select: text;
+        }
+        .details-pane.active { right: 0; box-shadow: -6px 0 20px rgba(0,0,0,0.06); }
+        .details-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        .close-details-btn { background: var(--hover-bg); width: 28px; height: 28px; border-radius: 50%; border: none; font-size: 13px; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; }
+        .close-details-btn:hover { color: var(--text-main); }
+        
+        .detail-item { margin-bottom: 18px; }
+        .detail-label { font-size: 11px; font-weight: 600; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .detail-value { font-size: 14px; color: var(--text-main); word-break: break-all; }
+
+        .detail-actions { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; gap: 8px; }
+        .btn-detail-edit { flex: 1; padding: 8px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text-main); font-weight: 500; }
+        .btn-detail-edit:hover { background-color: var(--hover-bg); border-color: var(--active-blue-text); }
+        .btn-detail-delete { padding: 8px 12px; background-color: transparent; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-size: 13px; color: #ea4335; }
+        .btn-detail-delete:hover { background-color: rgba(234, 67, 53, 0.1); }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: var(--modal-backdrop); backdrop-filter: blur(2px); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease;}
+        .modal.show { display: flex; opacity: 1; }
+        .modal-content { background-color: var(--bg-surface); padding: 32px; border-radius: 16px; width: 420px; box-shadow: var(--shadow-float); transform: translateY(10px); transition: transform 0.2s ease; user-select: text; border: 1px solid var(--border-color); }
+        .modal.show .modal-content { transform: translateY(0); }
+        .modal-content h2 { margin-bottom: 24px; font-weight: 500; font-size: 18px; color: var(--text-main); }
+        
+        .cat-modal-content { width: 320px; padding: 24px; }
+        .cat-modal-content h2 { font-size: 16px; margin-bottom: 16px; }
+        
+        .form-group { margin-bottom: 16px; position: relative; }
+        .form-group input { width: 100%; padding: 10px 14px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; outline: none; font-size: 14px; color: var(--text-main); }
+        .form-group input:focus { border-color: var(--active-blue-text); }
+        
+        input[type="date"] { cursor: pointer; color: var(--text-main); }
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; filter: invert(0.5); }
+
+        .custom-select-wrapper { position: relative; user-select: none; width: 100%; }
+        .custom-select { width: 100%; padding: 10px 14px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: var(--text-main); }
+        .custom-select:hover { border-color: var(--text-sub); }
+        
+        .custom-options { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; margin-top: 6px; box-shadow: var(--shadow-float); z-index: 110; overflow: hidden; max-height: 200px; overflow-y: auto;}
+        .custom-options.show { display: block; }
+        .custom-option { padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; color: var(--text-main); }
+        .custom-option:hover { background-color: var(--hover-bg); }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+        .btn-primary { background-color: var(--active-blue-text); color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
+        .btn-text { background: none; border: none; padding: 8px 20px; color: var(--text-sub); cursor: pointer; font-weight: 500; font-size: 14px; border-radius: 6px; }
+        .btn-text:hover { background-color: var(--hover-bg); color: var(--text-main); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo" id="homeLogo">📁 Project Drive</div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="ค้นหาชื่อโปรเจ็กต์...">
+        </div>
+    </header>
+
+    <div class="app-body">
+        <aside class="sidebar">
+            <div>
+                <button class="add-btn" id="openModalBtn">➕ สร้างใหม่</button>
+                <div class="nav-list" id="navList">
+                    <div class="nav-item active" data-category="All"><span>ไดรฟ์ของฉัน (All)</span></div>
+                </div>
+                <div class="add-category-btn" id="addCategoryBtn">➕ เพิ่มหมวดหมู่</div>
+            </div>
+            <div class="sidebar-footer">
+                <button class="theme-toggle-btn" id="themeToggleBtn">🌙 โหมดมืด</button>
+            </div>
+        </aside>
+
+        <main class="main-content" id="mainContent">
+            <div class="selection-toolbar" id="selectionToolbar">
+                <button class="toolbar-btn close" id="clearSelectionBtn" title="ยกเลิก">✖</button>
+                <span class="selection-count" id="selectionCount">เลือก 1 รายการ</span>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn" id="topEditBtn" title="แก้ไข" style="display: none;">✎</button>
+                <button class="toolbar-btn" id="topDeleteBtn" title="ลบ">🗑️</button>
+            </div>
+
+            <div class="content-header">
+                <h2 class="content-title" id="contentTitle">โปรเจ็กต์ทั้งหมด</h2>
+                <select id="sortSelect" class="sort-select">
+                    <option value="newest">เพิ่มล่าสุด (ใหม่ไปเก่า)</option>
+                    <option value="oldest">เพิ่มล่าสุด (เก่าไปใหม่)</option>
+                    <option value="nameAsc">ชื่อ ก-ฮ (A-Z)</option>
+                    <option value="nameDesc">ชื่อ ฮ-ก (Z-A)</option>
+                    <option value="deadline">กำหนดส่ง (ใกล้ถึงก่อน)</option>
+                </select>
+            </div>
+            
+            <div class="grid-container" id="project-grid"></div>
+            <div id="selectionBox" class="selection-box"></div>
+        </main>
+
+        <aside class="details-pane" id="detailsPane">
+            <div class="details-header">
+                <h3 id="detail-title" style="font-size: 16px; font-weight: 500;">รายละเอียด</h3>
+                <button class="close-details-btn" id="closeDetailsBtn">✖</button>
+            </div>
+            <div class="detail-item"><div class="detail-label">หมวดหมู่</div><div class="detail-value" id="detail-category"></div></div>
+            <div class="detail-item"><div class="detail-label">สถานะ</div><div class="detail-value status-wrapper"><span class="status-dot" id="detail-dot"></span> <span id="detail-status"></span></div></div>
+            <div class="detail-item"><div class="detail-label">กำหนดส่ง (Deadline)</div><div class="detail-value" id="detail-deadline"></div></div>
+            <div class="detail-item"><div class="detail-label">ลิงก์แนบ</div><div class="detail-value" id="detail-link"></div></div>
+
+            <div class="detail-actions">
+                <button class="btn-detail-edit" id="detailEditBtn">✎ แก้ไขข้อมูล</button>
+                <button class="btn-detail-delete" id="detailDeleteBtn" title="ลบงานนี้">🗑️</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modals -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">สร้างโปรเจ็กต์ใหม่</h2>
+            <form id="projectForm">
+                <div class="form-group"><input type="text" id="p-name" placeholder="ชื่อโปรเจ็กต์" required></div>
+                <div class="form-group">
+                    <div class="custom-select-wrapper" id="catCustomDropdown">
+                        <div class="custom-select" id="catSelectBtn"><div id="catSelectText">เลือกหมวดหมู่...</div><span>▼</span></div>
+                        <div class="custom-options" id="catOptions"></div>
+                    </div>
+                    <input type="hidden" id="p-category" required>
+                </div>
+                <div class="form-group">
+                    <div class="custom-select-wrapper" id="statusCustomDropdown">
+                        <div class="custom-select" id="statusSelectBtn">
+                            <div class="status-wrapper" id="statusSelectText"><span class="status-dot dot-red"></span> รอดำเนินการ</div>
+                            <span>▼</span>
+                        </div>
+                        <div class="custom-options" id="statusOptions">
+                            <div class="custom-option" data-value="รอดำเนินการ"><span class="status-dot dot-red"></span> รอดำเนินการ</div>
+                            <div class="custom-option" data-value="กำลังเตรียมงาน (Pre-production)"><span class="status-dot dot-yellow"></span> กำลังเตรียมงาน (Pre-production)</div>
+                            <div class="custom-option" data-value="กำลังถ่ายทำ"><span class="status-dot dot-yellow"></span> กำลังถ่ายทำ</div>
+                            <div class="custom-option" data-value="กำลังตัดต่อ"><span class="status-dot dot-yellow"></span> กำลังตัดต่อ</div>
+                            <div class="custom-option" data-value="เสร็จสิ้น"><span class="status-dot dot-green"></span> เสร็จสิ้น</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="p-status" value="รอดำเนินการ" required>
+                </div>
+                <div class="form-group"><input type="date" id="p-deadline" placeholder="กำหนดส่ง"></div>
+                <div class="form-group"><input type="text" id="p-link" placeholder="ลิงก์ (เช่น Google Drive URL)"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-text" onclick="closeAllModals()">ยกเลิก</button>
+                    <button type="submit" class="btn-primary">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="modal">
+        <div class="modal-content cat-modal-content">
+            <h2 id="catModalTitle">เพิ่มหมวดหมู่ใหม่</h2>
+            <form id="categoryForm">
+                <div class="form-group"><input type="text" id="c-name" placeholder="ชื่อหมวดหมู่" required autocomplete="off"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-text" onclick="closeAllModals()">ยกเลิก</button>
+                    <button type="submit" class="btn-primary">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ส่วนสำคัญ: โค้ดเชื่อมต่อ Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // กุญแจเชื่อมต่อของคุณ
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6-GinaW_AqvAXx0yVPt0GXWgBau6R3A0",
+            authDomain: "trackingtask-5a065.firebaseapp.com",
+            projectId: "trackingtask-5a065",
+            storageBucket: "trackingtask-5a065.firebasestorage.app",
+            messagingSenderId: "459841987252",
+            appId: "1:459841987252:web:6777f1d122c6ba621bade1",
+            measurementId: "G-GYXGPH3DV8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const projectsCol = collection(db, "projects");
+
+        // --- ระบบตัวแปรต่างๆ ---
+        let projects = [];
+        let categories = JSON.parse(localStorage.getItem('driveCategories')) || ["PICTURE", "VDO", "FILM"];
+        let currentFilter = 'All'; 
+        let searchQuery = '';
+        let currentSort = 'newest';
+        let selectedProjectIds = []; 
+        let editingCatIndex = -1; 
+
+        const gridContainer = document.getElementById('project-grid');
+        const mainContent = document.getElementById('mainContent');
+        const detailsPane = document.getElementById('detailsPane');
+        const projectModal = document.getElementById('projectModal');
+        const categoryModal = document.getElementById('categoryModal');
+        const selectionToolbar = document.getElementById('selectionToolbar');
+        const selectionBox = document.getElementById('selectionBox');
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+        // --- Firebase ดึงข้อมูลแบบ Real-time ---
+        onSnapshot(projectsCol, (snapshot) => {
+            projects = [];
+            snapshot.forEach((document) => {
+                projects.push({ id: document.id, ...document.data() }); 
+            });
+            renderUI(); // อัปเดตหน้าจอทันทีที่มีการเปลี่ยนแปลง
+        });
+
+        // --- ระบบ Theme (Dark Mode) ---
+        let isDarkMode = localStorage.getItem('driveTheme') === 'dark';
+        function applyTheme() {
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeToggleBtn.innerText = '☀️ โหมดสว่าง';
+            } else {
+                document.body.classList.remove('dark-mode');
+                themeToggleBtn.innerText = '🌙 โหมดมืด';
+            }
+        }
+        themeToggleBtn.onclick = () => {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('driveTheme', isDarkMode ? 'dark' : 'light');
+            applyTheme();
+        };
+        applyTheme();
+
+        // --- Helper Functions ---
+        function getStatusColor(status) {
+            if (status === 'เสร็จสิ้น') return 'dot-green';
+            if (status === 'รอดำเนินการ') return 'dot-red';
+            return 'dot-yellow'; 
+        }
+        function formatDate(dateString) {
+            if (!dateString) return "-";
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('th-TH', options);
+        }
+
+        // --- หมวดหมู่ ---
+        function saveCategories() { localStorage.setItem('driveCategories', JSON.stringify(categories)); }
+        
+        function renderCategories() {
+            document.querySelectorAll('.dynamic-nav').forEach(el => el.remove());
+            const catOptions = document.getElementById('catOptions');
+            catOptions.innerHTML = '';
+
+            categories.forEach((cat, index) => {
+                const navItem = document.createElement('div');
+                navItem.className = `nav-item dynamic-nav ${currentFilter === cat ? 'active' : ''}`;
+                navItem.innerHTML = `
+                    <span style="flex:1;">${cat}</span>
+                    <div class="cat-actions">
+                        <button class="cat-action-btn" title="แก้ไข" onclick="window.editCategory(event, ${index})">✎</button>
+                        <button class="cat-action-btn" title="ลบ" onclick="window.deleteCategory(event, ${index})">🗑️</button>
+                    </div>
+                `;
+                navItem.onclick = (e) => {
+                    if(e.target.closest('.cat-action-btn')) return; 
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    navItem.classList.add('active');
+                    currentFilter = cat;
+                    document.getElementById('contentTitle').innerText = cat;
+                    clearSelection();
+                    renderUI();
+                };
+                document.getElementById('navList').appendChild(navItem);
+
+                const opt = document.createElement('div');
+                opt.className = 'custom-option';
+                opt.setAttribute('data-value', cat);
+                opt.innerText = cat;
+                opt.onclick = () => {
+                    document.getElementById('catSelectText').innerText = cat;
+                    document.getElementById('p-category').value = cat;
+                    catOptions.classList.remove('show');
+                    document.getElementById('catSelectBtn').classList.remove('active');
+                };
+                catOptions.appendChild(opt);
+            });
+            
+            document.querySelector('[data-category="All"]').onclick = function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = 'All';
+                document.getElementById('contentTitle').innerText = "โปรเจ็กต์ทั้งหมด";
+                clearSelection();
+                renderUI();
+            };
+        }
+
+        document.getElementById('addCategoryBtn').onclick = () => {
+            editingCatIndex = -1;
+            document.getElementById('catModalTitle').innerText = "เพิ่มหมวดหมู่ใหม่";
+            document.getElementById('categoryForm').reset();
+            openModal(categoryModal);
+        };
+
+        window.editCategory = function(e, index) {
+            e.stopPropagation();
+            editingCatIndex = index;
+            document.getElementById('catModalTitle').innerText = "แก้ไขชื่อหมวดหมู่";
+            document.getElementById('c-name').value = categories[index];
+            openModal(categoryModal);
+        }
+
+        window.deleteCategory = async function(e, index) {
+            e.stopPropagation();
+            const catName = categories[index];
+            if(confirm(`ลบหมวดหมู่ "${catName}"?\n(งานที่อยู่ในหมวดนี้จะถูกย้ายไปที่ "ไม่ได้จัดหมวดหมู่")`)) {
+                // อัปเดตงานบน Firebase ที่อิงกับหมวดหมู่นี้
+                for (const p of projects) {
+                    if(p.category === catName) {
+                        const docRef = doc(db, "projects", p.id);
+                        await updateDoc(docRef, { category: "ไม่ได้จัดหมวดหมู่" });
+                    }
+                }
+                categories.splice(index, 1);
+                if(currentFilter === catName) document.getElementById('homeLogo').click();
+                saveCategories();
+                renderCategories();
+            }
+        }
+
+        document.getElementById('categoryForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('c-name').value.trim();
+            if(!newName) return;
+            if(editingCatIndex === -1) {
+                if(!categories.includes(newName)) categories.push(newName);
+            } else {
+                const oldName = categories[editingCatIndex];
+                categories[editingCatIndex] = newName;
+                // อัปเดตงานบน Firebase ที่เปลี่ยนชื่อหมวดหมู่
+                for (const p of projects) {
+                    if(p.category === oldName) {
+                        const docRef = doc(db, "projects", p.id);
+                        await updateDoc(docRef, { category: newName });
+                    }
+                }
+                if(currentFilter === oldName) currentFilter = newName;
+            }
+            saveCategories();
+            renderCategories();
+            closeAllModals();
+        };
+
+        document.getElementById('sortSelect').onchange = (e) => {
+            currentSort = e.target.value;
+            renderUI();
+        };
+
+        // --- Render UI ---
+        function renderUI() {
+            gridContainer.innerHTML = ''; 
+            let displayProjects = projects.filter(project => {
+                const matchesCategory = (currentFilter === 'All' || project.category === currentFilter);
+                const matchesSearch = project.name.toLowerCase().includes(searchQuery);
+                return matchesCategory && matchesSearch;
+            });
+
+            displayProjects.sort((a, b) => {
+                if (currentSort === 'newest') return (b.createdAt || 0) - (a.createdAt || 0);
+                if (currentSort === 'oldest') return (a.createdAt || 0) - (b.createdAt || 0);
+                if (currentSort === 'nameAsc') return a.name.localeCompare(b.name, 'th');
+                if (currentSort === 'nameDesc') return b.name.localeCompare(a.name, 'th');
+                if (currentSort === 'deadline') {
+                    if(!a.deadline) return 1; if(!b.deadline) return -1;
+                    return new Date(a.deadline) - new Date(b.deadline);
+                }
+                return 0;
+            });
+
+            displayProjects.forEach((project) => {
+                const card = document.createElement('div');
+                card.className = `project-card ${selectedProjectIds.includes(project.id) ? 'selected' : ''}`;
+                card.setAttribute('data-id', project.id);
+                card.innerHTML = `
+                    <div class="card-header"><span class="folder-icon">📁</span><h3>${project.name}</h3></div>
+                    <div class="card-meta">
+                        <div class="status-wrapper"><span class="status-dot ${getStatusColor(project.status)}"></span> ${project.status}</div>
+                        ${project.deadline ? `<div class="card-deadline">📅 ${formatDate(project.deadline)}</div>` : ''}
+                    </div>
+                `;
+                card.onclick = (e) => {
+                    if(e.ctrlKey || e.metaKey) {
+                        toggleSelection(project.id);
+                    } else {
+                        selectedProjectIds = [project.id];
+                        updateToolbar();
+                        openDetails(project);
+                        renderUI();
+                    }
+                };
+                gridContainer.appendChild(card);
+            });
+        }
+
+        // --- ระบบลากคลุม ---
+        let isMouseDown = false;
+        let isDragging = false;
+        let startX, startY;
+
+        mainContent.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.project-card') || e.target.closest('.content-header') || e.target.closest('.selection-toolbar')) return;
+            isMouseDown = true;
+            isDragging = false;
+            const rect = mainContent.getBoundingClientRect();
+            startX = e.clientX - rect.left + mainContent.scrollLeft;
+            startY = e.clientY - rect.top + mainContent.scrollTop;
+            selectionBox.style.left = startX + 'px';
+            selectionBox.style.top = startY + 'px';
+            selectionBox.style.width = '0';
+            selectionBox.style.height = '0';
+            selectionBox.style.display = 'block';
+            if(!e.ctrlKey && !e.metaKey) clearSelection(); 
+        });
+
+        mainContent.addEventListener('mousemove', (e) => {
+            if (!isMouseDown) return;
+            const rect = mainContent.getBoundingClientRect();
+            const currentX = e.clientX - rect.left + mainContent.scrollLeft;
+            const currentY = e.clientY - rect.top + mainContent.scrollTop;
+            if (Math.abs(currentX - startX) > 5 || Math.abs(currentY - startY) > 5) {
+                isDragging = true;
+            }
+            if(isDragging) {
+                const left = Math.min(currentX, startX);
+                const top = Math.min(currentY, startY);
+                const width = Math.abs(currentX - startX);
+                const height = Math.abs(currentY - startY);
+                selectionBox.style.left = left + 'px';
+                selectionBox.style.top = top + 'px';
+                selectionBox.style.width = width + 'px';
+                selectionBox.style.height = height + 'px';
+
+                const selectionRect = selectionBox.getBoundingClientRect();
+                document.querySelectorAll('.project-card').forEach(card => {
+                    const cardRect = card.getBoundingClientRect();
+                    // เปลี่ยนจากการหาด้วย Integer เป็น String เพราะ Firebase id เป็น string
+                    const id = card.getAttribute('data-id');
+                    const isIntersecting = !(selectionRect.right < cardRect.left || selectionRect.left > cardRect.right || selectionRect.bottom < cardRect.top || selectionRect.top > cardRect.bottom);
+                    if(isIntersecting) {
+                        if(!selectedProjectIds.includes(id)) selectedProjectIds.push(id);
+                        card.classList.add('selected');
+                    }
+                });
+                updateToolbar();
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if(isMouseDown) {
+                isMouseDown = false;
+                selectionBox.style.display = 'none';
+                if(isDragging) {
+                    if(selectedProjectIds.length === 1) {
+                        const p = projects.find(proj => proj.id === selectedProjectIds[0]);
+                        if(p) openDetails(p);
+                    } else if(selectedProjectIds.length > 1) {
+                        detailsPane.classList.remove('active');
+                    }
+                    isDragging = false;
+                }
+            }
+        });
+
+        // --- Toolbar & Details Control ---
+        function toggleSelection(id) {
+            const idx = selectedProjectIds.indexOf(id);
+            if(idx > -1) selectedProjectIds.splice(idx, 1);
+            else selectedProjectIds.push(id);
+            updateToolbar();
+            renderUI();
+        }
+
+        function clearSelection() {
+            selectedProjectIds = [];
+            updateToolbar();
+            detailsPane.classList.remove('active');
+            renderUI();
+        }
+
+        function updateToolbar() {
+            if(selectedProjectIds.length > 0) {
+                document.getElementById('selectionCount').innerText = `เลือก ${selectedProjectIds.length} รายการ`;
+                selectionToolbar.classList.add('show');
+                document.getElementById('topEditBtn').style.display = (selectedProjectIds.length === 1) ? 'flex' : 'none';
+                if(selectedProjectIds.length > 1) detailsPane.classList.remove('active');
+            } else {
+                selectionToolbar.classList.remove('show');
+                detailsPane.classList.remove('active');
+            }
+        }
+
+        document.getElementById('clearSelectionBtn').onclick = clearSelection;
+        
+        // --- ฟังก์ชันลบงานบน Firebase ---
+        const deleteSelectedProjects = async () => {
+            if(confirm(`ยืนยันการลบ ${selectedProjectIds.length} รายการที่เลือก?`)) {
+                for (const id of selectedProjectIds) {
+                    await deleteDoc(doc(db, "projects", id));
+                }
+                clearSelection();
+            }
+        };
+        document.getElementById('topDeleteBtn').onclick = deleteSelectedProjects;
+        document.getElementById('detailDeleteBtn').onclick = deleteSelectedProjects;
+
+        function openDetails(project) {
+            if(selectedProjectIds.length > 1) return;
+            document.getElementById('detail-title').innerText = project.name;
+            document.getElementById('detail-category').innerText = project.category;
+            document.getElementById('detail-status').innerText = project.status;
+            document.getElementById('detail-link').innerText = project.link || "-";
+            document.getElementById('detail-deadline').innerText = formatDate(project.deadline);
+            document.getElementById('detail-dot').className = `status-dot ${getStatusColor(project.status)}`;
+            
+            detailsPane.classList.add('active');
+        }
+
+        document.getElementById('closeDetailsBtn').onclick = clearSelection;
+
+        // Custom Dropdown
+        function setupDropdown(wrapperId, btnId, optionsId) {
+            const wrapper = document.getElementById(wrapperId);
+            const btn = document.getElementById(btnId);
+            const options = document.getElementById(optionsId);
+            btn.addEventListener('click', () => { options.classList.toggle('show'); btn.classList.toggle('active'); });
+            document.addEventListener('click', (e) => { if (!wrapper.contains(e.target)) { options.classList.remove('show'); btn.classList.remove('active'); }});
+        }
+        setupDropdown('catCustomDropdown', 'catSelectBtn', 'catOptions');
+        setupDropdown('statusCustomDropdown', 'statusSelectBtn', 'statusOptions');
+
+        document.querySelectorAll('#statusOptions .custom-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const dotClass = getStatusColor(value);
+                document.getElementById('statusSelectText').innerHTML = `<span class="status-dot ${dotClass}"></span> ${value}`;
+                document.getElementById('p-status').value = value;
+                document.getElementById('statusOptions').classList.remove('show');
+                document.getElementById('statusSelectBtn').classList.remove('active');
+            });
+        });
+
+        window.closeAllModals = function() {
+            document.querySelectorAll('.modal').forEach(m => {
+                m.classList.remove('show');
+                setTimeout(() => m.style.display = 'none', 200);
+            });
+            document.getElementById('catOptions').classList.remove('show');
+            document.getElementById('statusOptions').classList.remove('show');
+        }
+
+        function openModal(modalEl) {
+            modalEl.style.display = 'flex';
+            setTimeout(() => modalEl.classList.add('show'), 10);
+        }
+
+        document.getElementById('openModalBtn').onclick = () => {
+            if (categories.length === 0) return alert("กรุณาเพิ่มหมวดหมู่ก่อนสร้างโปรเจ็กต์");
+            selectedProjectIds = []; 
+            document.getElementById('modalTitle').innerText = "สร้างโปรเจ็กต์ใหม่";
+            document.getElementById('projectForm').reset();
+            document.getElementById('p-category').value = categories[0];
+            document.getElementById('catSelectText').innerText = categories[0];
+            document.getElementById('p-status').value = "รอดำเนินการ";
+            document.getElementById('statusSelectText').innerHTML = `<span class="status-dot dot-red"></span> รอดำเนินการ`;
+            openModal(projectModal);
+        };
+
+        function triggerEditCurrentProject() {
+            const p = projects.find(proj => proj.id === selectedProjectIds[0]);
+            if(!p) return;
+            
+            document.getElementById('p-name').value = p.name;
+            document.getElementById('p-link').value = p.link || "";
+            document.getElementById('p-deadline').value = p.deadline || "";
+            document.getElementById('p-category').value = p.category;
+            document.getElementById('catSelectText').innerText = p.category;
+            document.getElementById('p-status').value = p.status;
+            document.getElementById('statusSelectText').innerHTML = `<span class="status-dot ${getStatusColor(p.status)}"></span> ${p.status}`;
+            
+            document.getElementById('modalTitle').innerText = "แก้ไขโปรเจ็กต์";
+            openModal(projectModal);
+        }
+
+        document.getElementById('topEditBtn').onclick = triggerEditCurrentProject;
+        document.getElementById('detailEditBtn').onclick = triggerEditCurrentProject;
+
+        // --- ฟังก์ชันบันทึกข้อมูลขึ้น Firebase ---
+        document.getElementById('projectForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const projectData = {
+                name: document.getElementById('p-name').value,
+                category: document.getElementById('p-category').value,
+                status: document.getElementById('p-status').value,
+                deadline: document.getElementById('p-deadline').value,
+                link: document.getElementById('p-link').value
+            };
+
+            try {
+                if (selectedProjectIds.length === 0) { 
+                    // โหมดสร้างใหม่
+                    projectData.createdAt = Date.now(); // บันทึกเวลาสร้างเพื่อใช้ Sort
+                    await addDoc(projectsCol, projectData);
+                } else { 
+                    // โหมดแก้ไข
+                    const docRef = doc(db, "projects", selectedProjectIds[0]);
+                    await updateDoc(docRef, projectData);
+                }
+                closeAllModals();
+                clearSelection();
+            } catch (error) {
+                console.error("Error saving document: ", error);
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+            }
+        };
+
+        document.getElementById('homeLogo').onclick = () => {
+            currentFilter = 'All'; searchQuery = ''; document.getElementById('searchInput').value = '';
+            document.getElementById('contentTitle').innerText = "โปรเจ็กต์ทั้งหมด";
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.querySelector('[data-category="All"]').classList.add('active');
+            clearSelection();
+            document.getElementById('sortSelect').value = 'newest'; currentSort = 'newest';
+            renderUI();
+        };
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            renderUI();
+        });
+
+        renderCategories();
+    </script>
+</body>
+</html>

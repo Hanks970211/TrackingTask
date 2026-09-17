@@ -11,10 +11,11 @@
             --bg-body: #f8f9fa;
             --bg-surface: #ffffff;
             --bg-card: #ffffff;
+            --bg-column: #f1f3f4;
             --text-main: #202124;
             --text-sub: #5f6368;
             --border-color: #e8eaed;
-            --hover-bg: #f1f3f4;
+            --hover-bg: #e8eaed;
             --active-blue-bg: #e8f0fe;
             --active-blue-text: #1a73e8;
             --input-bg: #f8f9fa;
@@ -27,6 +28,7 @@
             --bg-body: #131314;
             --bg-surface: #1e1f20;
             --bg-card: #282a2c;
+            --bg-column: #202124;
             --text-main: #e3e3e3;
             --text-sub: #9aa0a6;
             --border-color: #333538;
@@ -72,30 +74,57 @@
         .theme-toggle-btn { background: none; border: 1px solid var(--border-color); color: var(--text-sub); padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .theme-toggle-btn:hover { background-color: var(--hover-bg); color: var(--text-main); }
 
-        .main-content { flex: 1; background-color: var(--bg-surface); border-radius: 16px 16px 0 0; margin-top: 16px; margin-right: 16px; padding: 32px; box-shadow: var(--shadow-subtle); overflow-y: auto; position: relative; }
-        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color); }
+        .main-content { flex: 1; background-color: var(--bg-surface); border-radius: 16px 0 0 0; margin-top: 16px; padding: 24px 24px 0 24px; box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-shrink: 0;}
         .content-title { font-size: 18px; font-weight: 500; color: var(--text-main); }
         
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+
+        /* สไตล์สำหรับปุ่ม View Toggle */
+        .view-toggle { display: flex; background: var(--input-bg); border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; }
+        .view-btn { background: none; border: none; padding: 6px 12px; cursor: pointer; color: var(--text-sub); font-size: 14px; transition: all 0.2s; }
+        .view-btn.active { background: var(--active-blue-bg); color: var(--active-blue-text); }
+        .view-btn:hover:not(.active) { background: var(--hover-bg); color: var(--text-main); }
+
         .sort-select { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-sub); background-color: var(--bg-surface); cursor: pointer; outline: none; }
         .sort-select:hover, .sort-select:focus { border-color: var(--active-blue-text); }
 
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        /* --- สไตล์สำหรับ View ทั้งสองแบบ --- */
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; overflow-y: auto; padding-bottom: 24px; align-content: flex-start; flex: 1; }
+        .kanban-board { display: flex; gap: 16px; overflow-x: auto; overflow-y: hidden; flex: 1; padding-bottom: 16px; }
+        
+        .kanban-column { flex: 0 0 280px; background-color: var(--bg-column); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid transparent; transition: border-color 0.2s, background-color 0.2s; }
+        .kanban-column.drag-over { border-color: var(--active-blue-text); background-color: var(--active-blue-bg); }
+        .kanban-header { padding: 16px; font-size: 14px; font-weight: 600; color: var(--text-sub); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
+        .kanban-cards { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 
-        .project-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 16px; cursor: pointer; user-select: text;}
+        /* การ์ดงานรวม (ใช้ร่วมกันทั้ง 2 มุมมอง) */
+        .project-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; user-select: text; transition: border-color 0.2s, box-shadow 0.2s;}
         .project-card:hover { border-color: var(--active-blue-text); box-shadow: var(--shadow-subtle); }
         .project-card.selected { background-color: var(--active-blue-bg); border-color: var(--active-blue-text); }
         
-        .card-header { display: flex; align-items: center; gap: 12px; pointer-events: none; }
-        .folder-icon { font-size: 24px; }
-        .project-card h3 { font-size: 15px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        /* สไตล์พิเศษเมื่ออยู่ใน Kanban */
+        .kanban-board .project-card { cursor: grab; }
+        .kanban-board .project-card:active { cursor: grabbing; opacity: 0.8; }
         
-        .card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: auto; pointer-events: none;}
+        /* สไตล์พิเศษเมื่ออยู่ใน Grid */
+        .grid-container .project-card { border-radius: 12px; padding: 20px; gap: 16px; }
+        
+        .card-header { display: flex; align-items: center; gap: 10px; pointer-events: none; }
+        .folder-icon { font-size: 20px; }
+        .grid-container .folder-icon { font-size: 24px; }
+        .project-card h3 { font-size: 14px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .grid-container .project-card h3 { font-size: 15px; }
+        
+        .card-meta { display: flex; justify-content: space-between; align-items: center; pointer-events: none;}
+        .grid-container .card-meta { margin-top: auto; }
         .status-wrapper { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-sub); }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
         .dot-green { background-color: #34a853; box-shadow: 0 0 0 2px rgba(52, 168, 83, 0.2); } 
         .dot-yellow { background-color: #fbbc04; box-shadow: 0 0 0 2px rgba(251, 188, 4, 0.2); } 
         .dot-red { background-color: #ea4335; box-shadow: 0 0 0 2px rgba(234, 67, 53, 0.2); } 
-        .card-deadline { font-size: 12px; color: var(--text-sub);}
+        .card-deadline { font-size: 11px; color: var(--text-sub);}
+        .grid-container .card-deadline { font-size: 12px; }
 
         .selection-box { position: absolute; background-color: rgba(26, 115, 232, 0.15); border: 1px solid rgba(26, 115, 232, 0.5); z-index: 100; pointer-events: none; display: none; }
 
@@ -200,16 +229,27 @@
 
             <div class="content-header">
                 <h2 class="content-title" id="contentTitle">โปรเจ็กต์ทั้งหมด</h2>
-                <select id="sortSelect" class="sort-select">
-                    <option value="newest">เพิ่มล่าสุด (ใหม่ไปเก่า)</option>
-                    <option value="oldest">เพิ่มล่าสุด (เก่าไปใหม่)</option>
-                    <option value="nameAsc">ชื่อ ก-ฮ (A-Z)</option>
-                    <option value="nameDesc">ชื่อ ฮ-ก (Z-A)</option>
-                    <option value="deadline">กำหนดส่ง (ใกล้ถึงก่อน)</option>
-                </select>
+                <div class="header-actions">
+                    <!-- ปุ่มสลับมุมมอง (View Toggle) -->
+                    <div class="view-toggle">
+                        <button id="viewGridBtn" class="view-btn" title="มุมมองตาราง">🔲</button>
+                        <button id="viewKanbanBtn" class="view-btn" title="มุมมองกระดาน">📋</button>
+                    </div>
+
+                    <select id="sortSelect" class="sort-select">
+                        <option value="newest">เพิ่มล่าสุด (ใหม่ไปเก่า)</option>
+                        <option value="oldest">เพิ่มล่าสุด (เก่าไปใหม่)</option>
+                        <option value="nameAsc">ชื่อ ก-ฮ (A-Z)</option>
+                        <option value="nameDesc">ชื่อ ฮ-ก (Z-A)</option>
+                        <option value="deadline">กำหนดส่ง (ใกล้ถึงก่อน)</option>
+                    </select>
+                </div>
             </div>
             
-            <div class="grid-container" id="project-grid"></div>
+            <!-- พื้นที่แสดงผล (มีทั้ง 2 แบบ แต่จะสลับกันซ่อน/แสดง) -->
+            <div class="grid-container" id="project-grid" style="display: none;"></div>
+            <div class="kanban-board" id="kanban-board" style="display: none;"></div>
+            
             <div id="selectionBox" class="selection-box"></div>
         </main>
 
@@ -282,13 +322,11 @@
         </div>
     </div>
 
-    <!-- ส่วนสำคัญ: โค้ดเชื่อมต่อ Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // กุญแจเชื่อมต่อของคุณ
         const firebaseConfig = {
             apiKey: "AIzaSyB6-GinaW_AqvAXx0yVPt0GXWgBau6R3A0",
             authDomain: "trackingtask-5a065.firebaseapp.com",
@@ -303,7 +341,6 @@
         const db = getFirestore(app);
         const projectsCol = collection(db, "projects");
 
-        // --- ระบบตัวแปรต่างๆ ---
         let projects = [];
         let categories = JSON.parse(localStorage.getItem('driveCategories')) || ["PICTURE", "VDO", "FILM"];
         let currentFilter = 'All'; 
@@ -311,8 +348,13 @@
         let currentSort = 'newest';
         let selectedProjectIds = []; 
         let editingCatIndex = -1; 
+        
+        // ตัวแปรเก็บสถานะมุมมองปัจจุบัน (ค่าเริ่มต้นให้เป็น grid หรือดึงจากที่เคยบันทึกไว้)
+        let currentView = localStorage.getItem('driveView') || 'grid';
+        const allStatuses = ["รอดำเนินการ", "กำลังเตรียมงาน (Pre-production)", "กำลังถ่ายทำ", "กำลังตัดต่อ", "เสร็จสิ้น"];
 
         const gridContainer = document.getElementById('project-grid');
+        const kanbanBoard = document.getElementById('kanban-board');
         const mainContent = document.getElementById('mainContent');
         const detailsPane = document.getElementById('detailsPane');
         const projectModal = document.getElementById('projectModal');
@@ -320,17 +362,42 @@
         const selectionToolbar = document.getElementById('selectionToolbar');
         const selectionBox = document.getElementById('selectionBox');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const viewGridBtn = document.getElementById('viewGridBtn');
+        const viewKanbanBtn = document.getElementById('viewKanbanBtn');
 
-        // --- Firebase ดึงข้อมูลแบบ Real-time ---
+        // --- ระบบสลับมุมมอง (View Toggle Logic) ---
+        function applyViewToggleUI() {
+            viewGridBtn.classList.toggle('active', currentView === 'grid');
+            viewKanbanBtn.classList.toggle('active', currentView === 'kanban');
+            
+            gridContainer.style.display = currentView === 'grid' ? 'grid' : 'none';
+            kanbanBoard.style.display = currentView === 'kanban' ? 'flex' : 'none';
+        }
+
+        viewGridBtn.onclick = () => {
+            currentView = 'grid';
+            localStorage.setItem('driveView', 'grid');
+            applyViewToggleUI();
+            renderUI();
+        };
+
+        viewKanbanBtn.onclick = () => {
+            currentView = 'kanban';
+            localStorage.setItem('driveView', 'kanban');
+            applyViewToggleUI();
+            renderUI();
+        };
+
+        // --- เริ่มต้นโหลดข้อมูล ---
         onSnapshot(projectsCol, (snapshot) => {
             projects = [];
             snapshot.forEach((document) => {
                 projects.push({ id: document.id, ...document.data() }); 
             });
-            renderUI(); // อัปเดตหน้าจอทันทีที่มีการเปลี่ยนแปลง
+            renderUI(); 
         });
 
-        // --- ระบบ Theme (Dark Mode) ---
+        // --- ระบบโหมดมืด (Dark Mode) ---
         let isDarkMode = localStorage.getItem('driveTheme') === 'dark';
         function applyTheme() {
             if (isDarkMode) {
@@ -346,7 +413,10 @@
             localStorage.setItem('driveTheme', isDarkMode ? 'dark' : 'light');
             applyTheme();
         };
+
+        // Initialize UI Settings
         applyTheme();
+        applyViewToggleUI();
 
         // --- Helper Functions ---
         function getStatusColor(status) {
@@ -360,7 +430,6 @@
             return new Date(dateString).toLocaleDateString('th-TH', options);
         }
 
-        // --- หมวดหมู่ ---
         function saveCategories() { localStorage.setItem('driveCategories', JSON.stringify(categories)); }
         
         function renderCategories() {
@@ -431,7 +500,6 @@
             e.stopPropagation();
             const catName = categories[index];
             if(confirm(`ลบหมวดหมู่ "${catName}"?\n(งานที่อยู่ในหมวดนี้จะถูกย้ายไปที่ "ไม่ได้จัดหมวดหมู่")`)) {
-                // อัปเดตงานบน Firebase ที่อิงกับหมวดหมู่นี้
                 for (const p of projects) {
                     if(p.category === catName) {
                         const docRef = doc(db, "projects", p.id);
@@ -454,7 +522,6 @@
             } else {
                 const oldName = categories[editingCatIndex];
                 categories[editingCatIndex] = newName;
-                // อัปเดตงานบน Firebase ที่เปลี่ยนชื่อหมวดหมู่
                 for (const p of projects) {
                     if(p.category === oldName) {
                         const docRef = doc(db, "projects", p.id);
@@ -473,9 +540,8 @@
             renderUI();
         };
 
-        // --- Render UI ---
+        // --- ระบบวาดหน้าจอรวม (แยกย้ายไปวาด Grid หรือ Kanban ตามที่เลือก) ---
         function renderUI() {
-            gridContainer.innerHTML = ''; 
             let displayProjects = projects.filter(project => {
                 const matchesCategory = (currentFilter === 'All' || project.category === currentFilter);
                 const matchesSearch = project.name.toLowerCase().includes(searchQuery);
@@ -494,64 +560,160 @@
                 return 0;
             });
 
+            if (currentView === 'grid') {
+                renderGrid(displayProjects);
+            } else {
+                renderKanban(displayProjects);
+            }
+        }
+
+        function createCardContent(project, isGrid) {
+            return `
+                <div class="card-header"><span class="folder-icon">📁</span><h3>${project.name}</h3></div>
+                <div class="card-meta">
+                    ${isGrid ? `<div class="status-wrapper"><span class="status-dot ${getStatusColor(project.status)}"></span> ${project.status}</div>` : ''}
+                    ${project.deadline ? `<div class="card-deadline">📅 ${formatDate(project.deadline)}</div>` : '<div></div>'}
+                </div>
+            `;
+        }
+
+        function handleCardClick(e, project) {
+            if(e.ctrlKey || e.metaKey) {
+                toggleSelection(project.id);
+            } else {
+                selectedProjectIds = [project.id];
+                updateToolbar();
+                openDetails(project);
+                renderUI();
+            }
+        }
+
+        function renderGrid(displayProjects) {
+            gridContainer.innerHTML = '';
             displayProjects.forEach((project) => {
                 const card = document.createElement('div');
                 card.className = `project-card ${selectedProjectIds.includes(project.id) ? 'selected' : ''}`;
                 card.setAttribute('data-id', project.id);
-                card.innerHTML = `
-                    <div class="card-header"><span class="folder-icon">📁</span><h3>${project.name}</h3></div>
-                    <div class="card-meta">
-                        <div class="status-wrapper"><span class="status-dot ${getStatusColor(project.status)}"></span> ${project.status}</div>
-                        ${project.deadline ? `<div class="card-deadline">📅 ${formatDate(project.deadline)}</div>` : ''}
-                    </div>
-                `;
-                card.onclick = (e) => {
-                    if(e.ctrlKey || e.metaKey) {
-                        toggleSelection(project.id);
-                    } else {
-                        selectedProjectIds = [project.id];
-                        updateToolbar();
-                        openDetails(project);
-                        renderUI();
-                    }
-                };
+                card.innerHTML = createCardContent(project, true);
+                
+                card.onclick = (e) => handleCardClick(e, project);
                 gridContainer.appendChild(card);
             });
         }
 
-        // --- ระบบลากคลุม ---
+        function renderKanban(displayProjects) {
+            kanbanBoard.innerHTML = ''; 
+            allStatuses.forEach(status => {
+                const col = document.createElement('div');
+                col.className = 'kanban-column';
+                col.dataset.status = status;
+                
+                const dotColor = getStatusColor(status);
+                const colHeader = document.createElement('div');
+                colHeader.className = 'kanban-header';
+                colHeader.innerHTML = `<span class="status-dot ${dotColor}"></span> ${status}`;
+                
+                const cardsContainer = document.createElement('div');
+                cardsContainer.className = 'kanban-cards';
+
+                cardsContainer.addEventListener('dragover', (e) => {
+                    e.preventDefault(); 
+                    col.classList.add('drag-over');
+                });
+                cardsContainer.addEventListener('dragleave', () => {
+                    col.classList.remove('drag-over');
+                });
+                cardsContainer.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    col.classList.remove('drag-over');
+                    const projectId = e.dataTransfer.getData('text/plain');
+                    
+                    const project = projects.find(p => p.id === projectId);
+                    if (project && project.status !== status) {
+                        try {
+                            const docRef = doc(db, "projects", projectId);
+                            await updateDoc(docRef, { status: status });
+                        } catch (error) {
+                            console.error("Error updating status:", error);
+                        }
+                    }
+                });
+
+                const columnProjects = displayProjects.filter(p => p.status === status);
+                columnProjects.forEach((project) => {
+                    const card = document.createElement('div');
+                    card.className = `project-card ${selectedProjectIds.includes(project.id) ? 'selected' : ''}`;
+                    card.setAttribute('data-id', project.id);
+                    card.setAttribute('draggable', 'true'); 
+                    
+                    card.innerHTML = createCardContent(project, false);
+
+                    card.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', project.id);
+                        card.style.opacity = '0.5';
+                    });
+                    card.addEventListener('dragend', () => {
+                        card.style.opacity = '1';
+                    });
+
+                    card.onclick = (e) => handleCardClick(e, project);
+
+                    cardsContainer.appendChild(card);
+                });
+
+                col.appendChild(colHeader);
+                col.appendChild(cardsContainer);
+                kanbanBoard.appendChild(col);
+            });
+        }
+
+        // --- ระบบลากคลุม (ประยุกต์ใช้ได้ทั้ง 2 มุมมอง) ---
         let isMouseDown = false;
-        let isDragging = false;
+        let isDraggingBox = false;
         let startX, startY;
 
         mainContent.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.project-card') || e.target.closest('.content-header') || e.target.closest('.selection-toolbar')) return;
+            // ป้องกันการลากคลุมเมื่อคลิกที่จุดอื่นที่ไม่ใช่พื้นหลัง
+            if (e.target.closest('.project-card') || e.target.closest('.content-header') || e.target.closest('.selection-toolbar') || e.target.closest('.kanban-header')) return;
+            
             isMouseDown = true;
-            isDragging = false;
+            isDraggingBox = false;
+            
             const rect = mainContent.getBoundingClientRect();
-            startX = e.clientX - rect.left + mainContent.scrollLeft;
-            startY = e.clientY - rect.top + mainContent.scrollTop;
+            // เช็คว่ากำลังอยู่ในกล่อง Container ไหน (เพื่อให้คำนวณการเลื่อนเมาส์ถูก)
+            const activeContainer = currentView === 'grid' ? gridContainer : kanbanBoard;
+            
+            startX = e.clientX - rect.left + activeContainer.scrollLeft;
+            startY = e.clientY - rect.top + activeContainer.scrollTop;
+            
             selectionBox.style.left = startX + 'px';
             selectionBox.style.top = startY + 'px';
             selectionBox.style.width = '0';
             selectionBox.style.height = '0';
             selectionBox.style.display = 'block';
+            
             if(!e.ctrlKey && !e.metaKey) clearSelection(); 
         });
 
         mainContent.addEventListener('mousemove', (e) => {
             if (!isMouseDown) return;
+            
             const rect = mainContent.getBoundingClientRect();
-            const currentX = e.clientX - rect.left + mainContent.scrollLeft;
-            const currentY = e.clientY - rect.top + mainContent.scrollTop;
+            const activeContainer = currentView === 'grid' ? gridContainer : kanbanBoard;
+            
+            const currentX = e.clientX - rect.left + activeContainer.scrollLeft;
+            const currentY = e.clientY - rect.top + activeContainer.scrollTop;
+            
             if (Math.abs(currentX - startX) > 5 || Math.abs(currentY - startY) > 5) {
-                isDragging = true;
+                isDraggingBox = true;
             }
-            if(isDragging) {
+            
+            if(isDraggingBox) {
                 const left = Math.min(currentX, startX);
                 const top = Math.min(currentY, startY);
                 const width = Math.abs(currentX - startX);
                 const height = Math.abs(currentY - startY);
+                
                 selectionBox.style.left = left + 'px';
                 selectionBox.style.top = top + 'px';
                 selectionBox.style.width = width + 'px';
@@ -560,9 +722,9 @@
                 const selectionRect = selectionBox.getBoundingClientRect();
                 document.querySelectorAll('.project-card').forEach(card => {
                     const cardRect = card.getBoundingClientRect();
-                    // เปลี่ยนจากการหาด้วย Integer เป็น String เพราะ Firebase id เป็น string
                     const id = card.getAttribute('data-id');
                     const isIntersecting = !(selectionRect.right < cardRect.left || selectionRect.left > cardRect.right || selectionRect.bottom < cardRect.top || selectionRect.top > cardRect.bottom);
+                    
                     if(isIntersecting) {
                         if(!selectedProjectIds.includes(id)) selectedProjectIds.push(id);
                         card.classList.add('selected');
@@ -576,19 +738,18 @@
             if(isMouseDown) {
                 isMouseDown = false;
                 selectionBox.style.display = 'none';
-                if(isDragging) {
+                if(isDraggingBox) {
                     if(selectedProjectIds.length === 1) {
                         const p = projects.find(proj => proj.id === selectedProjectIds[0]);
                         if(p) openDetails(p);
                     } else if(selectedProjectIds.length > 1) {
                         detailsPane.classList.remove('active');
                     }
-                    isDragging = false;
+                    isDraggingBox = false;
                 }
             }
         });
 
-        // --- Toolbar & Details Control ---
         function toggleSelection(id) {
             const idx = selectedProjectIds.indexOf(id);
             if(idx > -1) selectedProjectIds.splice(idx, 1);
@@ -618,7 +779,6 @@
 
         document.getElementById('clearSelectionBtn').onclick = clearSelection;
         
-        // --- ฟังก์ชันลบงานบน Firebase ---
         const deleteSelectedProjects = async () => {
             if(confirm(`ยืนยันการลบ ${selectedProjectIds.length} รายการที่เลือก?`)) {
                 for (const id of selectedProjectIds) {
@@ -644,7 +804,6 @@
 
         document.getElementById('closeDetailsBtn').onclick = clearSelection;
 
-        // Custom Dropdown
         function setupDropdown(wrapperId, btnId, optionsId) {
             const wrapper = document.getElementById(wrapperId);
             const btn = document.getElementById(btnId);
@@ -711,7 +870,6 @@
         document.getElementById('topEditBtn').onclick = triggerEditCurrentProject;
         document.getElementById('detailEditBtn').onclick = triggerEditCurrentProject;
 
-        // --- ฟังก์ชันบันทึกข้อมูลขึ้น Firebase ---
         document.getElementById('projectForm').onsubmit = async (e) => {
             e.preventDefault();
             const projectData = {
@@ -724,11 +882,9 @@
 
             try {
                 if (selectedProjectIds.length === 0) { 
-                    // โหมดสร้างใหม่
-                    projectData.createdAt = Date.now(); // บันทึกเวลาสร้างเพื่อใช้ Sort
+                    projectData.createdAt = Date.now(); 
                     await addDoc(projectsCol, projectData);
                 } else { 
-                    // โหมดแก้ไข
                     const docRef = doc(db, "projects", selectedProjectIds[0]);
                     await updateDoc(docRef, projectData);
                 }

@@ -6,7 +6,6 @@
     <title>Project Drive</title>
     
     <style>
-        /* --- ระบบ Theme Variables --- */
         :root {
             --bg-body: #f8f9fa;
             --bg-surface: #ffffff;
@@ -80,7 +79,6 @@
         
         .header-actions { display: flex; gap: 12px; align-items: center; }
 
-        /* สไตล์สำหรับปุ่ม View Toggle */
         .view-toggle { display: flex; background: var(--input-bg); border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; }
         .view-btn { background: none; border: none; padding: 6px 12px; cursor: pointer; color: var(--text-sub); font-size: 14px; transition: all 0.2s; }
         .view-btn.active { background: var(--active-blue-bg); color: var(--active-blue-text); }
@@ -89,7 +87,6 @@
         .sort-select { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-sub); background-color: var(--bg-surface); cursor: pointer; outline: none; }
         .sort-select:hover, .sort-select:focus { border-color: var(--active-blue-text); }
 
-        /* --- สไตล์สำหรับ View ทั้งสองแบบ --- */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; overflow-y: auto; padding-bottom: 24px; align-content: flex-start; flex: 1; }
         .kanban-board { display: flex; gap: 16px; overflow-x: auto; overflow-y: hidden; flex: 1; padding-bottom: 16px; }
         
@@ -98,16 +95,12 @@
         .kanban-header { padding: 16px; font-size: 14px; font-weight: 600; color: var(--text-sub); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 8px; }
         .kanban-cards { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 
-        /* การ์ดงานรวม (ใช้ร่วมกันทั้ง 2 มุมมอง) */
         .project-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; user-select: text; transition: border-color 0.2s, box-shadow 0.2s;}
         .project-card:hover { border-color: var(--active-blue-text); box-shadow: var(--shadow-subtle); }
         .project-card.selected { background-color: var(--active-blue-bg); border-color: var(--active-blue-text); }
         
-        /* สไตล์พิเศษเมื่ออยู่ใน Kanban */
         .kanban-board .project-card { cursor: grab; }
         .kanban-board .project-card:active { cursor: grabbing; opacity: 0.8; }
-        
-        /* สไตล์พิเศษเมื่ออยู่ใน Grid */
         .grid-container .project-card { border-radius: 12px; padding: 20px; gap: 16px; }
         
         .card-header { display: flex; align-items: center; gap: 10px; pointer-events: none; }
@@ -116,15 +109,19 @@
         .project-card h3 { font-size: 14px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .grid-container .project-card h3 { font-size: 15px; }
         
-        .card-meta { display: flex; justify-content: space-between; align-items: center; pointer-events: none;}
+        .card-meta { display: flex; justify-content: space-between; align-items: center; }
         .grid-container .card-meta { margin-top: auto; }
-        .status-wrapper { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-sub); }
+        .status-wrapper { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-sub); pointer-events: none; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
         .dot-green { background-color: #34a853; box-shadow: 0 0 0 2px rgba(52, 168, 83, 0.2); } 
         .dot-yellow { background-color: #fbbc04; box-shadow: 0 0 0 2px rgba(251, 188, 4, 0.2); } 
         .dot-red { background-color: #ea4335; box-shadow: 0 0 0 2px rgba(234, 67, 53, 0.2); } 
-        .card-deadline { font-size: 11px; color: var(--text-sub);}
+        .card-deadline { font-size: 11px; color: var(--text-sub); pointer-events: none; }
         .grid-container .card-deadline { font-size: 12px; }
+
+        /* สไตล์ปุ่มลิงก์มินิมอลบนการ์ด */
+        .card-link-btn { font-size: 12px; color: var(--active-blue-text); text-decoration: none; padding: 2px 8px; border-radius: 4px; background-color: var(--active-blue-bg); display: inline-flex; align-items: center; gap: 4px; transition: opacity 0.2s; }
+        .card-link-btn:hover { opacity: 0.8; text-decoration: underline; }
 
         .selection-box { position: absolute; background-color: rgba(26, 115, 232, 0.15); border: 1px solid rgba(26, 115, 232, 0.5); z-index: 100; pointer-events: none; display: none; }
 
@@ -230,7 +227,6 @@
             <div class="content-header">
                 <h2 class="content-title" id="contentTitle">โปรเจ็กต์ทั้งหมด</h2>
                 <div class="header-actions">
-                    <!-- ปุ่มสลับมุมมอง (View Toggle) -->
                     <div class="view-toggle">
                         <button id="viewGridBtn" class="view-btn" title="มุมมองตาราง">🔲</button>
                         <button id="viewKanbanBtn" class="view-btn" title="มุมมองกระดาน">📋</button>
@@ -246,7 +242,6 @@
                 </div>
             </div>
             
-            <!-- พื้นที่แสดงผล (มีทั้ง 2 แบบ แต่จะสลับกันซ่อน/แสดง) -->
             <div class="grid-container" id="project-grid" style="display: none;"></div>
             <div class="kanban-board" id="kanban-board" style="display: none;"></div>
             
@@ -349,7 +344,6 @@
         let selectedProjectIds = []; 
         let editingCatIndex = -1; 
         
-        // ตัวแปรเก็บสถานะมุมมองปัจจุบัน (ค่าเริ่มต้นให้เป็น grid หรือดึงจากที่เคยบันทึกไว้)
         let currentView = localStorage.getItem('driveView') || 'grid';
         const allStatuses = ["รอดำเนินการ", "กำลังเตรียมงาน (Pre-production)", "กำลังถ่ายทำ", "กำลังตัดต่อ", "เสร็จสิ้น"];
 
@@ -365,7 +359,6 @@
         const viewGridBtn = document.getElementById('viewGridBtn');
         const viewKanbanBtn = document.getElementById('viewKanbanBtn');
 
-        // --- ระบบสลับมุมมอง (View Toggle Logic) ---
         function applyViewToggleUI() {
             viewGridBtn.classList.toggle('active', currentView === 'grid');
             viewKanbanBtn.classList.toggle('active', currentView === 'kanban');
@@ -388,7 +381,6 @@
             renderUI();
         };
 
-        // --- เริ่มต้นโหลดข้อมูล ---
         onSnapshot(projectsCol, (snapshot) => {
             projects = [];
             snapshot.forEach((document) => {
@@ -397,7 +389,6 @@
             renderUI(); 
         });
 
-        // --- ระบบโหมดมืด (Dark Mode) ---
         let isDarkMode = localStorage.getItem('driveTheme') === 'dark';
         function applyTheme() {
             if (isDarkMode) {
@@ -414,11 +405,9 @@
             applyTheme();
         };
 
-        // Initialize UI Settings
         applyTheme();
         applyViewToggleUI();
 
-        // --- Helper Functions ---
         function getStatusColor(status) {
             if (status === 'เสร็จสิ้น') return 'dot-green';
             if (status === 'รอดำเนินการ') return 'dot-red';
@@ -540,7 +529,6 @@
             renderUI();
         };
 
-        // --- ระบบวาดหน้าจอรวม (แยกย้ายไปวาด Grid หรือ Kanban ตามที่เลือก) ---
         function renderUI() {
             let displayProjects = projects.filter(project => {
                 const matchesCategory = (currentFilter === 'All' || project.category === currentFilter);
@@ -567,12 +555,19 @@
             }
         }
 
+        // ฟังก์ชันสร้างเนื้อหาการ์ด พร้อมปุ่มลิงก์มินิมอลที่คลิกได้ทันที
         function createCardContent(project, isGrid) {
+            let linkHtml = '';
+            if (project.link && project.link.trim() !== "") {
+                // ป้องกันไม่ให้คลิกการ์ดเปิด Details เมื่อกดที่ลิงก์
+                linkHtml = `<a href="${project.link}" target="_blank" class="card-link-btn" onclick="event.stopPropagation()">🔗 เปิดลิงก์</a>`;
+            }
+
             return `
                 <div class="card-header"><span class="folder-icon">📁</span><h3>${project.name}</h3></div>
                 <div class="card-meta">
                     ${isGrid ? `<div class="status-wrapper"><span class="status-dot ${getStatusColor(project.status)}"></span> ${project.status}</div>` : ''}
-                    ${project.deadline ? `<div class="card-deadline">📅 ${formatDate(project.deadline)}</div>` : '<div></div>'}
+                    ${linkHtml ? linkHtml : (project.deadline ? `<div class="card-deadline">📅 ${formatDate(project.deadline)}</div>` : '<div></div>')}
                 </div>
             `;
         }
@@ -667,20 +662,17 @@
             });
         }
 
-        // --- ระบบลากคลุม (ประยุกต์ใช้ได้ทั้ง 2 มุมมอง) ---
         let isMouseDown = false;
         let isDraggingBox = false;
         let startX, startY;
 
         mainContent.addEventListener('mousedown', (e) => {
-            // ป้องกันการลากคลุมเมื่อคลิกที่จุดอื่นที่ไม่ใช่พื้นหลัง
-            if (e.target.closest('.project-card') || e.target.closest('.content-header') || e.target.closest('.selection-toolbar') || e.target.closest('.kanban-header')) return;
+            if (e.target.closest('.project-card') || e.target.closest('.content-header') || e.target.closest('.selection-toolbar') || e.target.closest('.kanban-header') || e.target.closest('.card-link-btn')) return;
             
             isMouseDown = true;
             isDraggingBox = false;
             
             const rect = mainContent.getBoundingClientRect();
-            // เช็คว่ากำลังอยู่ในกล่อง Container ไหน (เพื่อให้คำนวณการเลื่อนเมาส์ถูก)
             const activeContainer = currentView === 'grid' ? gridContainer : kanbanBoard;
             
             startX = e.clientX - rect.left + activeContainer.scrollLeft;
@@ -795,7 +787,15 @@
             document.getElementById('detail-title').innerText = project.name;
             document.getElementById('detail-category').innerText = project.category;
             document.getElementById('detail-status').innerText = project.status;
-            document.getElementById('detail-link').innerText = project.link || "-";
+            
+            // ทำให้ลิงก์ใน Detail Pane กดคลิกได้จริงเช่นกัน
+            const detailLinkEl = document.getElementById('detail-link');
+            if (project.link && project.link.trim() !== "") {
+                detailLinkEl.innerHTML = `<a href="${project.link}" target="_blank" style="color: var(--active-blue-text); text-decoration: none;">${project.link}</a>`;
+            } else {
+                detailLinkEl.innerText = "-";
+            }
+
             document.getElementById('detail-deadline').innerText = formatDate(project.deadline);
             document.getElementById('detail-dot').className = `status-dot ${getStatusColor(project.status)}`;
             
